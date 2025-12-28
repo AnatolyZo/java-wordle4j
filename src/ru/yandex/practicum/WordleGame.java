@@ -1,5 +1,11 @@
 package ru.yandex.practicum;
 
+import ru.yandex.practicum.gamingexeptions.DuplicateExeption;
+import ru.yandex.practicum.gamingexeptions.InvalidWordLengthException;
+import ru.yandex.practicum.gamingexeptions.WordNotFoundInDictionary;
+
+import java.util.*;
+
 /*
 в этом классе хранится словарь и состояние игры
     текущий шаг
@@ -13,11 +19,141 @@ package ru.yandex.practicum;
 не забудьте про специальные типы исключений для игровых и неигровых ошибок
  */
 public class WordleGame {
-
-    private String answer;
-
+    private final String answer;
     private int steps;
+    private final WordleDictionary dictionary;
+    Random random = new Random();
 
-    private WordleDictionary dictionary;
+    public WordleGame(WordleDictionary dictionary) {
+        int dictionarySize = dictionary.getWords().size();
+        dictionary.setHintDictionary();
+        this.answer = dictionary.getHintDictionary().get(random.nextInt(dictionarySize));
+        steps = 6;
+        this.dictionary = dictionary;
+    }
 
+    public WordleGame(WordleDictionary dictionary, String answer) {
+        this.answer = answer;
+        steps = 6;
+        this.dictionary = dictionary;
+    }
+
+    public String getAnswer() {
+        return answer;
+    }
+
+    public int getSteps() {
+        return steps;
+    }
+
+    public void setSteps() {
+        steps--;
+    }
+
+    public WordleDictionary getDictionary() {
+        return dictionary;
+    }
+
+    //Метод выдает результат сравнения введенного слова с искомым
+    public String comparisonResult(String word) {
+        word = formatInputedWord(word);
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < word.length(); i++) {
+            if (word.charAt(i) == answer.charAt(i)) {
+                sb.append('+');
+                dictionary.setMatchedPositionLetters(i, String.valueOf(word.charAt(i)));
+            } else if (answer.contains(String.valueOf(word.charAt(i)))) {
+                sb.append('^');
+                dictionary.setMatchedLetters(String.valueOf(word.charAt(i)));
+            } else {
+                sb.append('-');
+                dictionary.setDismatchedLetters(String.valueOf(word.charAt(i)));
+            }
+        }
+
+        PrintWriter.writeLog(String.format("Пользователю выдан результат сравнения - %s, загаданное слово - %s", sb, word));
+        return sb.toString();
+    }
+
+    //Метод приводит слово к единому формату (строчные буквы, ё заменается на е)
+    private String formatInputedWord(String word) {
+        word = word.toLowerCase();
+
+        for (int i = 0; i < word.length(); i++) {
+            if (word.charAt(i) == 'ё') {
+                word = word.replace(word.charAt(i), 'е');
+            }
+        }
+        return word;
+    }
+
+    public boolean compareWord(String word) {
+        return formatInputedWord(word).equals(answer);
+    }
+
+    //Метод помечает введенное слово для исключения повторного ввода
+    public void addUsersWord(String usersWord) {
+        dictionary.getWords().put(usersWord, WordleDictionary.WORD_INSERTED_BY_USER);
+    }
+
+    //Метод определяет соответствие введенного слова правилам игры
+    public boolean processUsersWord(String usersWord) throws InvalidWordLengthException, WordNotFoundInDictionary, DuplicateExeption {
+        if (usersWord.length() != 5) {
+            throw new InvalidWordLengthException("Слово должно состоять ровно из 5 букв. Повторите ввод, попытка не засчитана.");
+        } else if (!dictionary.getWords().containsKey(usersWord)) {
+            throw new WordNotFoundInDictionary("Слово должно находиться в словаре. Повторите ввод, попытка не засчитана.");
+        } else if (dictionary.getWords().get(usersWord).equals(WordleDictionary.WORD_INSERTED_BY_USER)) {
+            throw new DuplicateExeption(String.format("Слово %s уже было введено ранее. Повторите ввод, попытка не засчитана.", usersWord));
+        }
+
+        return true;
+    }
+
+    //Метод по поиску подсказки
+    public String showHint() {
+        String hint;
+
+        //Блок для обработки подсказки сразу на новом ходе
+        if (dictionary.isStepChanged()) {
+            identifyHints();
+            dictionary.setStepChanged(false);
+        }
+
+        dictionary.setHintDictionary();
+        hint = dictionary.getHintDictionary().get(random.nextInt(dictionary.getHintDictionary().size()));
+
+        if (!hint.equals(answer)) {
+            dictionary.getWords().put(hint, WordleDictionary.HINT_OFFERED);
+            //Подсказка удаляется на случай, если пользователь решит повторно взять подсказку
+            dictionary.getHintDictionary().remove(hint);
+        }
+
+        PrintWriter.writeLog(String.format("Пользователю дана подсказка - %s", hint));
+
+        return hint;
+    }
+
+    //Метод по отбору слов в качестве подсказок на основе уже введенных слов
+    private void identifyHints() {
+        boolean isWordMatch;
+
+        for (String word : dictionary.getWords().keySet()) {
+            isWordMatch = true;
+
+            if (dictionary.getWords().get(word).equals(WordleDictionary.HINT_DOES_NOT_OFFERED)
+                    || dictionary.getWords().get(word).equals(WordleDictionary.HINT_OFFERED)) {
+
+                /*Последовательная проверка слова на наличие отсутствующих букв, на наличие присутствующих букв
+                и на начличие букв, находящихся на верных позициях*/
+                isWordMatch = dictionary.checkForDismatchedLetters(word, isWordMatch);
+                isWordMatch = dictionary.checkForMatchedLetters(word, isWordMatch);
+                isWordMatch = dictionary.checkForMatchedPositionLetters(word, isWordMatch);
+            }
+
+            if (!isWordMatch) {
+                dictionary.getWords().put(word, WordleDictionary.HINT_EXCLUDED);
+            }
+        }
+    }
 }
