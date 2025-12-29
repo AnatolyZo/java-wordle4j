@@ -1,10 +1,13 @@
 package ru.yandex.practicum;
 
-import ru.yandex.practicum.gamingexeptions.AttemptsEndedExeption;
-import ru.yandex.practicum.gamingexeptions.DuplicateExeption;
-import ru.yandex.practicum.gamingexeptions.InvalidWordLengthException;
-import ru.yandex.practicum.gamingexeptions.WordNotFoundInDictionary;
+import ru.yandex.practicum.gamingexceptions.AttemptsEndedException;
+import ru.yandex.practicum.gamingexceptions.DuplicateException;
+import ru.yandex.practicum.gamingexceptions.InvalidWordLengthException;
+import ru.yandex.practicum.gamingexceptions.WordNotFoundInDictionary;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Scanner;
 
 /*
@@ -20,11 +23,21 @@ public class Wordle {
     private static final Scanner scanner = new Scanner(System.in);
     private static boolean isWordComplianceRules = false;
     private static String usersWord;
+    private static PrintWriter log;
 
     public static void main(String[] args) {
         try {
-            WordleGame wordleGame = new WordleGame(WordleDictionaryLoader.loadDictionary());
-            PrintWriter.writeLog("Пользователем успешно создана новая игра.");
+            CreateLog.createLog();
+
+            try {
+                log = new PrintWriter(new FileWriter("log.txt", true));
+            } catch (IOException e) {
+                System.out.println("Произошла ошибка во время записи файла.");
+            }
+
+            WordleGame wordleGame = new WordleGame(WordleDictionaryLoader.loadDictionary(log));
+
+            log.println("Пользователем успешно создана новая игра.");
             System.out.println("Загадано случайное слово, попытайтесь его отгадать.");
 
             while (wordleGame.getSteps() != 0) {
@@ -34,14 +47,14 @@ public class Wordle {
                     usersWord = scanner.nextLine();
 
                     if (usersWord.isEmpty()) {
-                        System.out.println("Подсказка - " + wordleGame.showHint());
+                        System.out.println("Подсказка - " + wordleGame.showHint(log));
                     } else {
-                        PrintWriter.writeLog(String.format("Пользователем введено слово - %s.", usersWord));
+                        log.println(String.format("Пользователем введено слово - %s.", usersWord));
                         try {
                             isWordComplianceRules = wordleGame.processUsersWord(usersWord);
-                        } catch (InvalidWordLengthException | WordNotFoundInDictionary | DuplicateExeption e) {
+                        } catch (InvalidWordLengthException | WordNotFoundInDictionary | DuplicateException e) {
                             System.out.println(e.getMessage());
-                            PrintWriter.writeLog(e.getMessage());
+                            log.println(e.getMessage());
                         }
                     }
                 }
@@ -51,7 +64,7 @@ public class Wordle {
                     return;
                 } else {
                     wordleGame.addUsersWord(usersWord);
-                    System.out.println(wordleGame.comparisonResult(usersWord));
+                    System.out.println(wordleGame.comparisonResult(usersWord, log));
                     wordleGame.setSteps();
                     wordleGame.getDictionary().setStepChanged(true);
                     System.out.printf("Ответ неверный, попробуйте еще раз. Оставшееся количество попыток - %d.%n", wordleGame.getSteps());
@@ -59,10 +72,10 @@ public class Wordle {
                 }
             }
 
-            throw new AttemptsEndedExeption("Попытки закончились. Игра завершена.");
+            throw new AttemptsEndedException("Попытки закончились. Игра завершена.");
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            PrintWriter.writeLog(e.getMessage());
+            log.println(e.getMessage());
         }
     }
 }

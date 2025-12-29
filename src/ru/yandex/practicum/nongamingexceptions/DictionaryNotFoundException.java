@@ -1,7 +1,7 @@
-package ru.yandex.practicum.nongamingexeptions;
+package ru.yandex.practicum.nongamingexceptions;
 
-public class DictionaryNotFoundExeption extends RuntimeException {
-    public DictionaryNotFoundExeption(String message) {
+public class DictionaryNotFoundException extends RuntimeException {
+    public DictionaryNotFoundException(String message) {
         super(message);
     }
 }

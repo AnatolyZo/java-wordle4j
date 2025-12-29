@@ -1,11 +1,12 @@
 package ru.yandex.practicum;
 
-import ru.yandex.practicum.nongamingexeptions.DictionaryIsEmptyExeption;
-import ru.yandex.practicum.nongamingexeptions.DictionaryNotFoundExeption;
+import ru.yandex.practicum.nongamingexceptions.DictionaryIsEmptyException;
+import ru.yandex.practicum.nongamingexceptions.DictionaryNotFoundException;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -16,33 +17,28 @@ import java.nio.file.Paths;
     на выходе должен быть класс WordleDictionary
  */
 public class WordleDictionaryLoader {
-    public static WordleDictionary loadDictionary() throws DictionaryNotFoundExeption, DictionaryIsEmptyExeption {
+    public static WordleDictionary loadDictionary(PrintWriter log) throws DictionaryNotFoundException, DictionaryIsEmptyException {
         WordleDictionary wordleDictionary = new WordleDictionary();
 
         if (!Files.exists(Paths.get("words_ru.txt"))) {
-            throw new DictionaryNotFoundExeption("Словарь не найден.");
+            throw new DictionaryNotFoundException("Словарь не найден.");
         }
 
         try (BufferedReader br = new BufferedReader(new FileReader("words_ru.txt", StandardCharsets.UTF_8))) {
-            while (br.ready()) {
-                String word = br.readLine();
+            String word;
+
+            while ((word = br.readLine()) != null) {
                 if (word.length() == 5) {
-                    word = word.toLowerCase();
-                    for (int i = 0; i < word.length(); i++) {
-                        if (word.charAt(i) == 'ё') {
-                            word = word.replace(word.charAt(i), 'е');
-                        }
-                    }
-                    wordleDictionary.setWords(word);
+                    wordleDictionary.setWords(wordleDictionary.formatWord(word));
                 }
             }
 
-            PrintWriter.writeLog("Пользователем успешно загружен словарь.");
+            log.println("Пользователем успешно загружен словарь.");
         } catch (IOException e) {
-            PrintWriter.writeLog(e.getMessage());
+            log.println(e.getMessage());
         }
         if (wordleDictionary.getWords().isEmpty()) {
-            throw new DictionaryIsEmptyExeption("Словарь пуст.");
+            throw new DictionaryIsEmptyException("Словарь пуст.");
         }
 
         return wordleDictionary;

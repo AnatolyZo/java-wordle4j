@@ -1,7 +1,7 @@
-package ru.yandex.practicum.gamingexeptions;
+package ru.yandex.practicum.gamingexceptions;
 
-public class AttemptsEndedExeption extends Exception {
-    public AttemptsEndedExeption(String message) {
+public class AttemptsEndedException extends Exception {
+    public AttemptsEndedException(String message) {
         super(message);
     }
 }

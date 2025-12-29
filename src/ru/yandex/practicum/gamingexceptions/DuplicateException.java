@@ -1,7 +1,7 @@
-package ru.yandex.practicum.gamingexeptions;
+package ru.yandex.practicum.gamingexceptions;
 
-public class DuplicateExeption extends Exception {
-    public DuplicateExeption(String message) {
+public class DuplicateException extends Exception {
+    public DuplicateException(String message) {
         super(message);
     }
 }

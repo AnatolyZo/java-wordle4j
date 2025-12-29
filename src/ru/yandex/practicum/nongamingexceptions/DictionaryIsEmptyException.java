@@ -1,7 +1,7 @@
-package ru.yandex.practicum.nongamingexeptions;
+package ru.yandex.practicum.nongamingexceptions;
 
-public class DictionaryIsEmptyExeption extends RuntimeException {
-    public DictionaryIsEmptyExeption(String message) {
+public class DictionaryIsEmptyException extends RuntimeException {
+    public DictionaryIsEmptyException(String message) {
         super(message);
     }
 }
