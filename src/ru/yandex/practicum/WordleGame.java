@@ -28,7 +28,7 @@ public class WordleGame {
     public WordleGame(WordleDictionary dictionary) {
         int dictionarySize = dictionary.getWords().size();
         dictionary.setHintDictionary();
-        this.answer = "лапта"/*dictionary.getHintDictionary().get(random.nextInt(dictionarySize))*/;
+        this.answer = dictionary.getHintDictionary().get(random.nextInt(dictionarySize));
         steps = 6;
         this.dictionary = dictionary;
     }
