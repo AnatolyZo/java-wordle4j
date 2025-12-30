@@ -5,8 +5,6 @@ import ru.yandex.practicum.gamingexceptions.DuplicateException;
 import ru.yandex.practicum.gamingexceptions.InvalidWordLengthException;
 import ru.yandex.practicum.gamingexceptions.WordNotFoundInDictionary;
 
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Scanner;
 
@@ -23,17 +21,11 @@ public class Wordle {
     private static final Scanner scanner = new Scanner(System.in);
     private static boolean isWordComplianceRules = false;
     private static String usersWord;
-    private static PrintWriter log;
+
 
     public static void main(String[] args) {
-        try {
-            CreateLog.createLog();
-
-            try {
-                log = new PrintWriter(new FileWriter("log.txt", true));
-            } catch (IOException e) {
-                System.out.println("Произошла ошибка во время записи файла.");
-            }
+        try (PrintWriter log = CreateLog.createPrintWriter()) {
+            CreateLog.createLogFile();
 
             WordleGame wordleGame = new WordleGame(WordleDictionaryLoader.loadDictionary(log));
 
@@ -75,7 +67,6 @@ public class Wordle {
             throw new AttemptsEndedException("Попытки закончились. Игра завершена.");
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            log.println(e.getMessage());
         }
     }
 }
