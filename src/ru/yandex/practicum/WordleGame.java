@@ -72,7 +72,7 @@ public class WordleGame {
                 dictionary.setDismatchedLetters(String.valueOf(word.charAt(i)));
             }
         }
-        System.out.println(dictionary.getMatchedLetters());
+
         log.println(String.format("Пользователю выдан результат сравнения - %s, загаданное слово - %s", sb, word));
         log.flush();
         return sb.toString();
@@ -126,10 +126,6 @@ public class WordleGame {
 
         log.println(String.format("Пользователю дана подсказка - %s", hint));
         log.flush();
-
-        for (String word : dictionary.getHintDictionary()) {
-            System.out.println(word);
-        }
 
         return hint;
     }
