@@ -19,7 +19,7 @@ public class WordleDictionary {
     //Список букв, которые совпадают по значению и позиции в искомом слове
     private final Map<Integer, String> matchedPositionLetters = new HashMap<>();
     //Список букв, которые совпадают только по значению
-    private final List<String> matchedLetters = new ArrayList<>();
+    private final Map<String, List<Integer>> matchedLetters = new HashMap();
     //Список букв, которые отсутствуют в искомом слове
     private final List<String> dismatchedLetters = new ArrayList<>();
     private boolean isStepChanged = false;
@@ -54,12 +54,21 @@ public class WordleDictionary {
         matchedPositionLetters.put(index, letter);
     }
 
-    public List<String> getMatchedLetters() {
+    public Map<String, List<Integer>> getMatchedLetters() {
         return matchedLetters;
     }
 
-    public void setMatchedLetters(String letter) {
-        matchedLetters.add(letter);
+    public void setMatchedLetters(String letter, Integer index) {
+        List<Integer> indexesList;
+
+        if (!matchedLetters.containsKey(letter)) {
+            indexesList = new ArrayList<>();
+        } else {
+            indexesList = matchedLetters.get(letter);
+        }
+
+        indexesList.add(index);
+        matchedLetters.put(letter, indexesList);
     }
 
     public List<String> getDismatchedLetters() {
@@ -93,8 +102,8 @@ public class WordleDictionary {
 
     public boolean checkForMatchedLetters(String word, boolean isWordMatch) {
         if (isWordMatch & !getMatchedLetters().isEmpty()) {
-            for (int i = 0; i < getMatchedLetters().size(); i++) {
-                if (!word.contains(getMatchedLetters().get(i))) {
+            for (Map.Entry<String, List<Integer>> entry : getMatchedLetters().entrySet()) {
+                if (!word.contains(entry.getKey()) || entry.getValue().contains(word.indexOf(entry.getKey()))) {
                     isWordMatch = false;
                     break;
                 }

@@ -34,8 +34,10 @@ public class WordleDictionaryLoader {
             }
 
             log.println("Пользователем успешно загружен словарь.");
+            log.flush();
         } catch (IOException e) {
             log.println(e.getMessage());
+            log.flush();
         }
         if (wordleDictionary.getWords().isEmpty()) {
             throw new DictionaryIsEmptyException("Словарь пуст.");

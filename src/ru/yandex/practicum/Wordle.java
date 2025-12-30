@@ -30,6 +30,7 @@ public class Wordle {
             WordleGame wordleGame = new WordleGame(WordleDictionaryLoader.loadDictionary(log));
 
             log.println("Пользователем успешно создана новая игра.");
+            log.flush();
             System.out.println("Загадано случайное слово, попытайтесь его отгадать.");
 
             while (wordleGame.getSteps() != 0) {
@@ -42,11 +43,13 @@ public class Wordle {
                         System.out.println("Подсказка - " + wordleGame.showHint(log));
                     } else {
                         log.println(String.format("Пользователем введено слово - %s.", usersWord));
+                        log.flush();
                         try {
                             isWordComplianceRules = wordleGame.processUsersWord(usersWord);
                         } catch (InvalidWordLengthException | WordNotFoundInDictionary | DuplicateException e) {
                             System.out.println(e.getMessage());
                             log.println(e.getMessage());
+                            log.flush();
                         }
                     }
                 }

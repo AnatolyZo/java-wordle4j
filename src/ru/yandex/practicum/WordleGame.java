@@ -28,7 +28,7 @@ public class WordleGame {
     public WordleGame(WordleDictionary dictionary) {
         int dictionarySize = dictionary.getWords().size();
         dictionary.setHintDictionary();
-        this.answer = dictionary.getHintDictionary().get(random.nextInt(dictionarySize));
+        this.answer = "лапта"/*dictionary.getHintDictionary().get(random.nextInt(dictionarySize))*/;
         steps = 6;
         this.dictionary = dictionary;
     }
@@ -66,14 +66,15 @@ public class WordleGame {
                 dictionary.setMatchedPositionLetters(i, String.valueOf(word.charAt(i)));
             } else if (answer.contains(String.valueOf(word.charAt(i)))) {
                 sb.append('^');
-                dictionary.setMatchedLetters(String.valueOf(word.charAt(i)));
+                dictionary.setMatchedLetters(String.valueOf(word.charAt(i)), i);
             } else {
                 sb.append('-');
                 dictionary.setDismatchedLetters(String.valueOf(word.charAt(i)));
             }
         }
-
+        System.out.println(dictionary.getMatchedLetters());
         log.println(String.format("Пользователю выдан результат сравнения - %s, загаданное слово - %s", sb, word));
+        log.flush();
         return sb.toString();
     }
 
@@ -124,6 +125,11 @@ public class WordleGame {
         }
 
         log.println(String.format("Пользователю дана подсказка - %s", hint));
+        log.flush();
+
+        for (String word : dictionary.getHintDictionary()) {
+            System.out.println(word);
+        }
 
         return hint;
     }
